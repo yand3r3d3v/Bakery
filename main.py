@@ -58,6 +58,8 @@ if __name__ == '__main__':
     white_bread = Bread('1', 10, 1000)
     black_bread = Bread('ч. хлеб', 10, 1000)
     peperoni = Pizza('Пеперони', 10, 10000)
+    gawaia = Pizza('Гавайская', 10, 10000)
+
 
     # СОЗДАЕМ СОТРУДНИКОВ
     barista = Barista('Кирилл', 1_000_000)
