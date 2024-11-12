@@ -57,6 +57,7 @@ if __name__ == '__main__':
     # СОЗДАЕМ ПРОДУКЦИЮ
     white_bread = Bread('1', 10, 1000)
     black_bread = Bread('ч. хлеб', 10, 1000)
+    rzanoy_bread = Bread('ржаной хлеб', 10, 10000)
     peperoni = Pizza('Пеперони', 10, 10000)
     gawaia = Pizza('Гавайская', 10, 10000)
 
