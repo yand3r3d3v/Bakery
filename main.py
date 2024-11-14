@@ -1,3 +1,7 @@
+import matplotlib.pyplot as plt
+
+from threading import Thread
+
 from products import Bread, Pizza, Product
 from employee import Baker, Kassir, Boss, Barista, Employee
 
@@ -13,7 +17,8 @@ class Bakery:
         self.employes = employes
 
     def start(self, client: Client):
-        self.drow_graph()
+        th = Thread(self.drow_graph())
+        th.start()
 
         product = self.choose_product()
         cnt = self.choose_count(product=product)
@@ -56,8 +61,6 @@ class Bakery:
                 break
             self.show('Извините, но товара не хватает, выберите другое кол-во!')
         return count
-            
-
 
     def product_exists(self, product):
         if any(pos for pos in self.products if pos.name == product):
@@ -83,7 +86,20 @@ class Bakery:
 
 
     def drow_graph(self):
-        pass
+        product_names = []
+        stock_values = []
+
+        for prod in self.products:
+            product_names.append(prod.name)
+            stock_values.append(prod.count)
+        
+        plt.figure(figsize=(10, 6))
+        plt.barh(product_names, stock_values, color='skyblue')
+        plt.xlabel('Количество в наличии')
+        plt.title('Запасы продуктов в пекарне')
+        plt.grid(axis='x')
+        plt.show()
+
         
 
 if __name__ == '__main__':
