@@ -1,7 +1,5 @@
 import matplotlib.pyplot as plt
 
-from threading import Thread
-
 from products import Bread, Pizza, Product
 from employee import Baker, Kassir, Boss, Barista, Employee
 
@@ -17,12 +15,13 @@ class Bakery:
         self.employes = employes
 
     def start(self, client: Client):
-        th = Thread(self.drow_graph())
-        th.start()
+        plt = self.drow_graph()
 
         product = self.choose_product()
         cnt = self.choose_count(product=product)
         self.calculate_purchase(product, cnt, client)
+        plt.close()
+
 
     def calculate_purchase(self, product, cnt, client):
         summary_price = product.price*int(cnt)
@@ -33,17 +32,6 @@ class Bakery:
             self.withdraw_money(client, summary_price)
         else: 
             self.show(f'У вас не хватает денег. \n Товар стоит: {summary_price} руб., а у вас {client.money} руб.')
-
-    def change_count(self, product, cnt):
-        product.count -= cnt 
-    
-    def withdraw_money(self, client, money_to_withdraw):
-        client.money -= money_to_withdraw
-
-    def enough_money(self, product_price, client_money):
-        if product_price <= client_money:
-            return True
-        return False
 
     def choose_product(self):
         while True:
@@ -73,6 +61,17 @@ class Bakery:
             return True
         return False
 
+    def enough_money(self, product_price, client_money):
+        if product_price <= client_money:
+            return True
+        return False
+
+    def change_count(self, product, cnt):
+        product.count -= cnt 
+    
+    def withdraw_money(self, client, money_to_withdraw):
+        client.money -= money_to_withdraw
+
     @staticmethod
     def ask(text):
         # пользователь вводит текст
@@ -98,9 +97,12 @@ class Bakery:
         plt.xlabel('Количество в наличии')
         plt.title('Запасы продуктов в пекарне')
         plt.grid(axis='x')
-        plt.show()
+        plt.ioff()
+        plt.show(block=False)
 
-        
+        return plt
+
+from random import randint     
 
 if __name__ == '__main__':
     # СОЗДАЕМ ПРОДУКЦИЮ
@@ -117,7 +119,7 @@ if __name__ == '__main__':
     kassir = Kassir('Влад', 999_999)
 
     # ИНИЦИАЛИЗАЦИЯ ПЕКАРНИ
-    bakery = Bakery(name='Пирожки', employes=[barista, baker, kassir], products=[white_bread, black_bread, peperoni])
+    bakery = Bakery(name='Пирожки', employes=[barista, baker, kassir], products=[Bread(f'{i*i}', randint(1, 100), randint(1, 100)) for i in range(1, 40)])
 
     # НАЧАЛО ВЗАИМОДЕЙСТВИЯ
     name, money = 'Витя', 10000
