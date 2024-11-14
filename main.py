@@ -1,56 +1,89 @@
 from products import Bread, Pizza, Product
-from employee import Baker, Kassir, Boss, Barista
+from employee import Baker, Kassir, Boss, Barista, Employee
 
 class Client:
     def __init__(self, name: str, money: int):
         self.name= name
         self.money = money
 
-class Purchase():
-    def __init__(self, products: dict[Product, int]):
-        self.products = products
-
 class Bakery:
-    def __init__(self, name=None, describe=None, employes=None, productions = None):
+    def __init__(self, name, products=list[Product], employes=list[Employee]):
         self.name = name
-        self.descirbe = describe
+        self.products = products
         self.employes = employes
-        self.productions = productions
-        self.category = (Bread, Pizza)
+
+    def start(self, client: Client):
+        self.drow_graph()
+
+        product = self.choose_product()
+        cnt = self.choose_count(product=product)
+        self.calculate_purchase(product, cnt, client)
+
+    def calculate_purchase(self, product, cnt, client):
+        summary_price = product.price*int(cnt)
+
+        if self.enough_money(product.price*int(cnt), client.money):
+            self.show(f'Спасибо за покупку. Вы купили {product.name} за {summary_price} руб.')
+            self.change_count(product, int(cnt))
+            self.withdraw_money(client, summary_price)
+        else: 
+            self.show(f'У вас не хватает денег. \n Товар стоит: {summary_price} руб., а у вас {client.money} руб.')
+
+    def change_count(self, product, cnt):
+        product.count -= cnt 
     
-    def enough_money(self, client_money, cnt, product_price):
-        if client_money >= product_price * cnt:
+    def withdraw_money(self, client, money_to_withdraw):
+        client.money -= money_to_withdraw
+
+    def enough_money(self, product_price, client_money):
+        if product_price <= client_money:
             return True
         return False
+
+    def choose_product(self):
+        while True:
+            product = self.ask('Выберите товар, укажите его название: ')
+            state, ans, product = self.product_exists(product=product)
+            self.show(ans)
+            if state:
+               break
+        return product
     
-    def show_menu(self):
-        print('Наш ассортимент!')
-        for category in self.category:
-            print(f'{category.name}:')
-            for product in self.productions:
-                if isinstance(product, category):
-                    print(f'- {product.name} (В наличии {product.count}) {product.price} руб.')
+    def choose_count(self, product):
+        while True:
+            count = self.ask(f'Выберите кол-во товара (доступно {product.count}): ')
+            if self.enough_count(product, count):
+                break
+            self.show('Извините, но товара не хватает, выберите другое кол-во!')
+        return count
+            
 
-    def product_exists(self, product_name):
-        return any(True for product in self.productions if product_name == product.name)
+
+    def product_exists(self, product):
+        if any(pos for pos in self.products if pos.name == product):
+            product = [prod for prod in self.products if prod.name == product][0]
+            return True, 'Такой товар есть, какое количество вам нужно?', product
+        return False, 'Простите, но такого товара нет, попробуйте еще раз', None
+
+    def enough_count(self, product, cnt):
+        if product.count >= int(cnt):
+            return True
+        return False
+
+    @staticmethod
+    def ask(text):
+        # пользователь вводит текст
+        return input(text)
     
-    def product_enough(self, product, cnt):
-        return product.count >= cnt
-
-    def choose_products(self):
-        products = dict()
-        product_choose = str(input('Введите наименование продукта: ')).lower()
-        while product_choose != 'думаю хватит':
-            if self.product_exists(product_choose):
-                product = [product for product in self.productions if product_choose == product.name][0]
-                count = int(input('Введите желаемое кол-во продукции: '))
-                if self.product_enough(product=product, cnt=count):
-                    products.setdefault(product, count)    
-            product_choose = str(input('Введите наименование продукта: ')).lower()
-        
-        return Purchase(products)
+    @staticmethod
+    def show(text):
+        # отображаем текст пользователю
+        print(text)
 
 
+
+    def drow_graph(self):
+        pass
         
 
 if __name__ == '__main__':
@@ -68,17 +101,18 @@ if __name__ == '__main__':
     kassir = Kassir('Влад', 999_999)
 
     # ИНИЦИАЛИЗАЦИЯ ПЕКАРНИ
-    bakery = Bakery(name='Пирожки', employes=[barista, baker, kassir],productions=[white_bread, black_bread, peperoni])
+    bakery = Bakery(name='Пирожки', employes=[barista, baker, kassir], products=[white_bread, black_bread, peperoni])
 
     # НАЧАЛО ВЗАИМОДЕЙСТВИЯ
     name, money = 'Витя', 10000
+    client = Client(name=name, money=money)
     #name = input('Введите имя: ')
-    #money = int('Сколько у вас денег: ')
-    print(f'ДОБРО ПОЖАЛОВАТЬ В ПЕКАРНЮ {bakery.name} {name}!')
-    if bakery.descirbe is not None:
-        print(bakery.descirbe)
+    #money = int(input('Сколько у вас денег: '))
+    
+    print(f'ДОБРО ПОЖАЛОВАТЬ В ПЕКАРНЮ {bakery.name}!')
+    while True:
+        bakery.start(client)
 
-    # ПРОДОЛЖЕНИЕ ВЗАИМОДЕЙСТВИЯ
-    #bakery.show_menu()
-    purchase = bakery.choose_products()
-    print(purchase.products)
+        if input('Вы хотите купить что-то еще? ').lower() in ('нет', 'не'):
+            print('Приходите еще!')
+            break
