@@ -7,6 +7,12 @@ class Product:
 
 class Bread(Product):
     name = 'Хлеб'
-
+    
+class Coffee(Product):
+    name = 'Кофе'
+    
 class Pizza(Product):
     name = 'Пицца'
+
+class Dessert(Product):
+    name = 'Десерт'

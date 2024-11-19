@@ -1,7 +1,6 @@
 import matplotlib.pyplot as plt
 
-
-from products import Bread, Pizza, Product
+from products import Bread, Pizza, Product, Coffee, Dessert
 from employee import Baker, Kassir, Boss, Barista, Employee
 
 from enum import Enum, auto
@@ -11,7 +10,8 @@ class State(Enum):
     missing = auto()
     not_exists = auto()
 
-
+class Purchase:
+    pass
 
 class Client:
     def __init__(self, name: str, money: int):
@@ -42,7 +42,7 @@ class Bakery:
         """
         summary_price = product.price*int(cnt)
 
-        if self.enough_money(summary_price, client.money):
+        if self.enough_money(summary_price, client):
             self.show(f'Спасибо за покупку. Вы купили {product.name} за {summary_price} руб.')
             self.change_count(product, int(cnt))
             self.withdraw_money(client, summary_price)
@@ -55,22 +55,42 @@ class Bakery:
         Возвращает Product
         """
         while True:
+            kassir = self.get_employee(Kassir)
+            boss = self.get_employee(Boss)
+            baker = self.get_employee(Baker)
+            barista = self.get_employee(Barista)
             product = self.ask('Выберите товар, укажите его название: ')
             state, ans, product = self.product_exists(product=product)
-            self.show(ans)
+            self.show(ans, employee=kassir)
             match state:
                 case State.exists:
                     break
                 case State.not_exists:
-                    boss = self.get_employee(Boss)
                     boss.get_feedback()
                 case State.missing:
-                    baker = self.get_employee(Baker)
+                    if self.enough_money(100, client):
+                        coffee = self.ask('Пока мы готовим, вы хотите кофе? ', employee=barista)
+                        if coffee.lower() == 'да':
+                            self.show('СПИСОК ДОСТУПНОГО КОФЕ:')
+                            for prod in self.get_category_product(Coffee):
+                                self.show(f'{prod.name} {prod.price} руб.')
+                            selected_coffee = self.choose_product()
+                            selected_cnt = self.choose_count(selected_coffee)
+                            self.calculate_purchase(selected_coffee, selected_cnt, client)
+                            #self.show(employee=barista, text='Вот ваш кофе. С вас 100$')
                     baker.bake(product)
+
 
 
         return product
     
+    def get_category_product(self, product_type: Product) -> list[Product]:
+        products = []
+        for prod in self.products:
+            if isinstance(prod, product_type):
+                products.append(prod)
+        return products
+
     def choose_count(self, product: Product) -> int:
         """
         Метод для выбора кол-ва продукции пользователем
@@ -89,12 +109,15 @@ class Bakery:
         Проверка на существование продукта
         Возвращает bool, str, Product
         """
-        if any(pos for pos in self.products if pos.name == product):
+        try:
             product = [prod for prod in self.products if prod.name == product][0]
+        except:
+            product = None
+        if product:
             if product.count != 0:
                 return State.exists, 'Такой товар есть, какое количество вам нужно?', product
             return State.missing, 'Извините, но товар закончился, сейчас мы его приготовим!', product
-        return State.not_exists, 'Простите, но такого товара нет, сейчас мы позовем нашего босса', None
+        return State.not_exists, 'Простите, но такого товара нет, сейчас мы позовем нашего босса', product
 
     def enough_count(self, product: Product, cnt) -> bool:
         """
@@ -104,11 +127,11 @@ class Bakery:
             return True
         return False
 
-    def enough_money(self, product_price, client_money) -> bool:
+    def enough_money(self, product_price, client: Client) -> bool:
         """
         Проверка на доступность покупки
         """
-        if product_price <= client_money:
+        if product_price <= client.money:
             return True
         return False
 
@@ -129,14 +152,19 @@ class Bakery:
         return [emp for emp in self.employes if isinstance(emp, employee)][0]
 
     @staticmethod
-    def ask(text) -> input:
+    def ask(text, employee = None) -> str:
         # пользователь вводит текст
-        return input(text)
+        if employee == None:
+            return input(text)
+        return input(f'{employee.info()}: {text}')
     
     @staticmethod
-    def show(text) -> None:
+    def show(text, employee = None) -> None:
         # отображаем текст пользователю
-        print(text)
+        if employee == None: 
+            print(text)
+            return
+        print(f'{employee.info()} {text}')
 
 
 
@@ -156,18 +184,30 @@ class Bakery:
         plt.ioff()
         plt.show(block=False)
 
-        return plt
-
-from random import randint     
+        return plt 
 
 if __name__ == '__main__':
     # СОЗДАЕМ ПРОДУКЦИЮ
     production = [
-        Bread('1', 0, 1000, 0.5),
-        Bread('ч. хлеб', 0, 1000, 0.5),
-        Bread('ржаной хлеб', 0, 100000, 0.5),
-        Pizza('Пеперони', 0, 10000, 0.5),
-        Pizza('Гавайская', 0, 10000, 0.5)
+        Bread('черный хлеб', 0, 1000, 2),
+        Bread('ржаной хлеб', 0, 1000, 2),
+        Bread('белый хлеб', 0, 1000, 2),
+        
+        Pizza('Пеперони', 0, 100, 3),
+        Pizza('Гавайская', 0, 100, 3),
+        Pizza('Мясная', 0, 100, 3),
+        Pizza('Четыре сыра', 0, 100, 3),
+        
+        Dessert('Медовик', 0, 50, 4),
+        Dessert('Наполеон', 0, 50, 4),
+        Dessert('Чизкейк', 0, 80, 4),
+        Dessert('Торт бисквитный', 0, 50, 4),
+        Dessert('Безе', 0, 150, 4),
+        Dessert('Эклер', 0, 150, 4),
+        Dessert('Тирамису', 0, 76, 4),
+        
+        Coffee('Американо', 1, 1, 1),
+        Coffee('Капучино', 1, 1, 1)
     ]
 
 
@@ -175,14 +215,15 @@ if __name__ == '__main__':
     employes = [
         Boss('Кирилл', 1_000_000),
         Baker('Саша', 1_000_001),
-        Kassir('Влад', 999_999)
+        Kassir('Влад', 999_999),
+        Barista('Вадим', 10_000)
     ]
 
     # ИНИЦИАЛИЗАЦИЯ ПЕКАРНИ
     bakery = Bakery(name='Пирожки', employes=employes, products=production)
 
     # НАЧАЛО ВЗАИМОДЕЙСТВИЯ
-    name, money = 'Витя', 10000
+    name, money = 'Витя', 0
     client = Client(name=name, money=money)
     #name = input('Введите имя: ')
     #money = int(input('Сколько у вас денег: '))

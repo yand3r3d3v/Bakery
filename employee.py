@@ -8,7 +8,7 @@ class Employee:
 
     @classmethod
     def info(cls):
-        return f'{cls.JOB})'
+        return f'{cls.JOB}:'
 
 class Kassir(Employee):
     JOB = 'Кассир'
@@ -40,3 +40,4 @@ class Barista(Employee):
     JOB = 'Бариста'
     def __init__(self, name, income):
         super().__init__(name, income)
+    
