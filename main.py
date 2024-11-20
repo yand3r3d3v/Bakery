@@ -35,7 +35,6 @@ class Bakery:
         self.calculate_purchase(product, cnt, client)
         plt.close()
 
-
     def calculate_purchase(self, product, cnt, client) -> None:
         """
         Метод для расчета покупки
@@ -154,14 +153,14 @@ class Bakery:
     @staticmethod
     def ask(text, employee = None) -> str:
         # пользователь вводит текст
-        if employee == None:
+        if employee is None:
             return input(text)
         return input(f'{employee.info()}: {text}')
     
     @staticmethod
     def show(text, employee = None) -> None:
         # отображаем текст пользователю
-        if employee == None: 
+        if employee is None: 
             print(text)
             return
         print(f'{employee.info()} {text}')

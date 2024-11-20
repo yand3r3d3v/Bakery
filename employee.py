@@ -12,8 +12,6 @@ class Employee:
 
 class Kassir(Employee):
     JOB = 'Кассир'
-    def __init__(self, name, income):
-        super().__init__(name, income)
 
 class Baker(Employee):
     JOB = 'Пекарь'
@@ -30,14 +28,9 @@ class Baker(Employee):
 
 class Boss(Employee):
     JOB = 'Босс'
-    def __init__(self, name, income):
-        super().__init__(name, income)
     
     def get_feedback(self):
         print(f'{self.info()} Здравствуйте, спасибо за ваше предложение, мы его обязательно рассмотрим.')
 
 class Barista(Employee):
     JOB = 'Бариста'
-    def __init__(self, name, income):
-        super().__init__(name, income)
-    
